@@ -1,9 +1,15 @@
 package com.example.skyscanner;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 import android.os.Bundle;
 import android.widget.TextView;
+
+import com.example.skyscanner.databinding.ActivityMainBinding;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.List;
 
@@ -15,52 +21,52 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView textViewResult;
+    private ActivityMainBinding mainBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        textViewResult = findViewById(R.id.text_view_result);
+        mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        mainBinding.setLifecycleOwner(this);
 
+        fetchDataFromApi();
+    }
+
+    public void fetchDataFromApi() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://skyscanner-skyscanner-flight-search-v1.p.rapidapi.com/apiservices/autosuggest/v1.0/UK/GBP/en-GB/?query=Stockholm")
+                .baseUrl("https://skyscanner-skyscanner-flight-search-v1.p.rapidapi.com/apiservices/autosuggest/v1.0/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         JsonSkyScannerAPI jsonSkyScannerAPI = retrofit.create(JsonSkyScannerAPI.class);
 
-        Call<List<Place>> call = jsonSkyScannerAPI.getPlaces();
+        Call<Place> call = jsonSkyScannerAPI.getPlaces();
 
-        call.enqueue(new Callback<List<Place>>() {
+        call.enqueue(new Callback<Place>() {
             @Override
-            public void onResponse(Call<List<Place>> call, Response<List<Place>> response) {
-                if (!response.isSuccessful()){
-                    textViewResult.setText("Code: " + response.code());
+            public void onResponse(Call<Place> call, Response<Place> response) {
+                if (!response.isSuccessful()) {
+                    mainBinding.textViewResult.setText("Code: " + response.code());
                     return;
                 }
 
-                List<Place> places = response.body();
+                Place place = response.body();
 
-                // for each place in our places list, execute the code
-                for (Place place: places) {
+                String content = "";
+                content += "PlaceId: " + place.getPlaceId() + "\n";
+                content += "PlaceName: " + place.getPlaceName() + "\n";
+                content += "CountryId: " + place.getCountryId() + "\n";
+                content += "RegionId: " + place.getRegionalId() + "\n";
+                content += "CityId: " + place.getCityId() + "\n";
+                content += "CountryName: " + place.getCountryName() + "\n\n";
 
-                    String content = "";
-                    content += "PlaceId: " + place.getPlaceId() + "\n";
-                    content += "PlaceName: " + place.getPlaceName() + "\n";
-                    content += "CountryId: " + place.getCountryId() + "\n";
-                    content += "RegionId: " + place.getRegionalId() + "\n";
-                    content += "CityId: " + place.getCityId() + "\n";
-                    content += "CountryName: " + place.getCountryName() + "\n\n";
-
-                    textViewResult.append(content);
-                }
+                mainBinding.textViewResult.append(content);
             }
 
             @Override
-            public void onFailure(Call<List<Place>> call, Throwable t) {
-                textViewResult.setText(t.getMessage());
+            public void onFailure(Call<Place> call, Throwable t) {
+                mainBinding.textViewResult.setText(t.getMessage());
             }
         });
     }
