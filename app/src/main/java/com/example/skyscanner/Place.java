@@ -17,6 +17,15 @@ public class Place {
     @SerializedName("CountryName")
     private String countryName;
 
+    public Place(String placeId, String placeName, String countryId, String regionalId, String cityId, String countryName) {
+        this.placeId = placeId;
+        this.placeName = placeName;
+        this.countryId = countryId;
+        this.regionalId = regionalId;
+        this.cityId = cityId;
+        this.countryName = countryName;
+    }
+
     public String getPlaceId() {
         return placeId;
     }

@@ -15,5 +15,5 @@ public interface JsonSkyScannerAPI {
             "x-rapidapi-key: 548aa9ba87mshcca697ffe0ef206p15a507jsn964a2b1dc9c2"
     })
     @GET("UK/GBP/en-GB/?query=Stockholm")
-    Call<Place> getPlaces();
+    Call<Root> getPlaces();
 }
